@@ -1,28 +1,25 @@
 import os
 
 from pyspark import SparkContext
-from pyspark.ml import Pipeline
-from pyspark.ml.classification import LogisticRegression
-from sparkdl import DeepImageFeaturizer
 
+from feature_extractor import FeatureExtractor
 from image_utils import ImageUtils
 
 if __name__ == '__main__':
     os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-8-openjdk-amd64'
     print(os.getenv("JAVA_HOME"))
 
-    SparkContext.setSystemProperty('spark.executor.memory', '700M')
+    SparkContext.setSystemProperty('spark.executor.memory', '1G')
     SparkContext.setSystemProperty('spark.cores.max', '4')
-    sc = SparkContext(master='spark://localhost:7077', appName='ImageFeatureSelector')
+    sc = SparkContext(master='local[*]', appName='ImageFeatureSelector')
     sc.setLogLevel('INFO')
 
-    basePath = 'micro-imagenet'
-    train = ImageUtils.load_train_data(basePath)
+    basePath = 'tiny-imagenet-200'
 
-    featurizer = DeepImageFeaturizer(inputCol="image", outputCol="features", modelName="InceptionV3")
-    lr = LogisticRegression(maxIter=20, regParam=0.05, elasticNetParam=0.3, labelCol="label")
-    p = Pipeline(stages=[featurizer, lr])
+    image_utils = ImageUtils(basePath, sc)
+    train = image_utils.load_train_data_as_matrix()
 
-    p_model = p.fit(train)
+    feature_extractor = FeatureExtractor(train)
+    train_with_features = feature_extractor.extract_features()
 
-    print(p_model)
+
