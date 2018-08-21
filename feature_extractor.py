@@ -7,8 +7,12 @@ kaze = cv2.KAZE_create()
 
 class FeatureExtractor:
 
-    def __init__(self, train):
+    def __init__(self, train, test):
         self.train = train
+        self.test = test
+
+        self.train_with_features = None
+        self.test_with_features = None
 
     @staticmethod
     def perform_sift_extraction(data):
@@ -27,30 +31,34 @@ class FeatureExtractor:
     def get_descriptors(train_with_descriptors):
         return list(map(lambda item: item[1], train_with_descriptors))
 
-    def extract_features(self):
-        train_with_features = []
-        i = 0
+    @staticmethod
+    def extract_features_from_data(data):
+        data_with_features = []
 
-        for instance in self.train:
+        for instance in data:
             instance_with_features = {
                 'label': instance[0],
                 'features': FeatureExtractor.extract_features_from_image(instance[1])
             }
 
-            train_with_features.append(instance_with_features)
+            data_with_features.append(instance_with_features)
 
-        return train_with_features
+        return data_with_features
+
+    def extract_features(self):
+        self.train_with_features = FeatureExtractor.extract_features_from_data(self.train)
+        self.test_with_features = FeatureExtractor.extract_features_from_data(self.test)
 
     @staticmethod
     def get_extraction_algorithm():
-        return sift
+        return sift, 128
 
     @staticmethod
     def extract_features_from_image(image, vector_size=50):
 
-        algorithm = FeatureExtractor.get_extraction_algorithm()
+        algorithm, descriptors_size = FeatureExtractor.get_extraction_algorithm()
 
-        # Dinding image keypoints
+        # Finding image keypoints
         key_points = algorithm.detect(image)
 
         # Getting first 32 of them.
@@ -62,15 +70,13 @@ class FeatureExtractor:
         key_points, descriptors = algorithm.compute(image, key_points)
 
         if descriptors is None:
-            print("debug")
-            return np.zeros(vector_size * 64)
+            return np.zeros(vector_size * descriptors_size)
 
         # Flatten all of them in one big vector - our feature vector
         descriptors = descriptors.flatten()
 
         # Making descriptor of same size
-        # Descriptor vector size is 64
-        needed_size = (vector_size * 64)
+        needed_size = (vector_size * descriptors_size)
 
         if descriptors.size < needed_size:
             # if we have less the 32 descriptors then just adding zeros at the

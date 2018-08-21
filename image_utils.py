@@ -1,3 +1,4 @@
+import csv
 import os
 from pathlib import Path
 
@@ -63,6 +64,18 @@ class ImageUtils:
         image = cv2.imread(image_tuple[0], cv2.IMREAD_COLOR)
         return image_tuple[1], image
 
+    @staticmethod
+    def get_test_labels(file_route):
+        labels = []
+
+        with open(file_route) as file_descriptor:
+            file = csv.reader(file_descriptor, delimiter="\t", quotechar='"')
+            for row in file:
+                label = int(row[1][1:])
+                labels.append(label)
+
+        return labels
+
     def load_train_data_as_matrix(self):
         train_path = Path(self.base_path + "/train")
 
@@ -71,3 +84,14 @@ class ImageUtils:
         labeled_image_paths = list(map(ImageUtils.add_image_labels, image_files))
 
         return list(map(ImageUtils.add_image_matrix, labeled_image_paths))
+
+    def load_test_data_as_matrix(self):
+        test_images_path = Path(self.base_path + "/val/images")
+        test_annotations_route = self.base_path + "/val/val_annotations.txt"
+
+        test_image_routes = [str(image_path) for image_path in test_images_path.iterdir()]
+        test_image_labels = ImageUtils.get_test_labels(test_annotations_route)
+
+        labeled_images_routes = list(zip(test_image_routes, test_image_labels))
+
+        return list(map(ImageUtils.add_image_matrix, labeled_images_routes))
