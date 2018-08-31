@@ -10,9 +10,9 @@ from pyspark.sql import functions
 
 class ImageUtils:
 
-    def __init__(self, base_path, sc):
+    def __init__(self, base_path, spark):
         self.base_path = base_path
-        self.sparkContext = sc
+        self.spark = spark
 
     @staticmethod
     def load_train_data(base_path):
@@ -51,21 +51,46 @@ class ImageUtils:
 
     @staticmethod
     def list_hdfs_content(path):
+
         return [line.rsplit(None, 1)[-1] for line in sh.hdfs('dfs', '-ls', path).split('\n') if
                 len(line.rsplit(None, 1))][1:]
 
     @staticmethod
     def add_image_labels(image_path):
+        """
+        Obtains the image label, for a given image route.
+
+        :param image_path: Image route
+        :return: Tuple of (route, label)
+        """
+
         label = int(image_path.split('/').pop().split('_')[0][1:])
         return image_path, label
 
     @staticmethod
     def add_image_matrix(image_tuple):
-        image = cv2.imread(image_tuple[0], cv2.IMREAD_COLOR)
-        return image_tuple[1], image
+        """
+        Obtains the image data from a given image route
+
+        :param image_tuple: Image route
+        :return: N-tuple with (label, image, route)
+        """
+
+        route = image_tuple[0]
+        label = image_tuple[1]
+
+        image = cv2.imread(route, cv2.IMREAD_COLOR)
+        return label, image, route
 
     @staticmethod
     def get_test_labels(file_route):
+        """
+        Loads the test labels from the test data set.
+
+        :param file_route: File that contains the labels for each one of the test images.
+        :return: List of image labels.
+        """
+
         labels = []
 
         with open(file_route) as file_descriptor:
@@ -77,15 +102,29 @@ class ImageUtils:
         return labels
 
     def load_train_data_as_matrix(self):
+        """
+        Loads the train data from the train folder.
+
+        :return: Spark RDD with tuples of (label, image, route)
+        """
+
         train_path = Path(self.base_path + "/train")
 
-        dirs = [currentFile for currentFile in train_path.iterdir()]
-        image_files = [str(image) for image_dir in dirs for image in Path(str(image_dir) + "/images").iterdir()]
-        labeled_image_paths = list(map(ImageUtils.add_image_labels, image_files))
+        class_folders = [class_folder for class_folder in train_path.iterdir()]
+        image_routes = [str(img) for image_dir in class_folders for img in Path(str(image_dir) + "/images").iterdir()]
+        labeled_image_routes = list(map(ImageUtils.add_image_labels, image_routes))
 
-        return list(map(ImageUtils.add_image_matrix, labeled_image_paths))
+        labeled_image_routes_df = self.spark.createDataFrame(labeled_image_routes)
+
+        return labeled_image_routes_df.rdd.map(ImageUtils.add_image_matrix)
 
     def load_test_data_as_matrix(self):
+        """
+        Loads the test data from the train folder.
+
+        :return: Spark RDD with tuples of (label, image, route)
+        """
+
         test_images_path = Path(self.base_path + "/val/images")
         test_annotations_route = self.base_path + "/val/val_annotations.txt"
 
@@ -94,4 +133,6 @@ class ImageUtils:
 
         labeled_images_routes = list(zip(test_image_routes, test_image_labels))
 
-        return list(map(ImageUtils.add_image_matrix, labeled_images_routes))
+        test_labeled_paths_rdd = self.spark.createDataFrame(labeled_images_routes)
+
+        return test_labeled_paths_rdd.rdd.map(ImageUtils.add_image_matrix)

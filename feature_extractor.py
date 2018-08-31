@@ -1,13 +1,14 @@
 import cv2
-import numpy as np
 
-sift = cv2.xfeatures2d.SIFT_create()
+import pyspark.ml.linalg as ml
+
 kaze = cv2.KAZE_create()
+sift = cv2.xfeatures2d.SIFT_create()
 
 
 class FeatureExtractor:
 
-    def __init__(self, train, test):
+    def __init__(self, train, test, spark, k, model):
         self.train = train
         self.test = test
 
@@ -33,54 +34,42 @@ class FeatureExtractor:
 
     @staticmethod
     def extract_features_from_data(data):
-        data_with_features = []
-
-        for instance in data:
-            instance_with_features = {
-                'label': instance[0],
-                'features': FeatureExtractor.extract_features_from_image(instance[1])
-            }
-
-            data_with_features.append(instance_with_features)
-
-        return data_with_features
+        return data[0], ml.DenseVector(FeatureExtractor.extract_features_from_image(data[1]).tolist())
 
     def extract_features(self):
-        self.train_with_features = FeatureExtractor.extract_features_from_data(self.train)
-        self.test_with_features = FeatureExtractor.extract_features_from_data(self.test)
+        self.train_with_features = self.train.map(FeatureExtractor.extract_features_from_data)
+        self.test_with_features = self.test.map(FeatureExtractor.extract_features_from_data)
 
     @staticmethod
     def get_extraction_algorithm():
         return sift, 128
 
     @staticmethod
-    def extract_features_from_image(image, vector_size=50):
+    def extract_features_from_image(data):
+        label = data[0]
+        image = data[1]
 
-        algorithm, descriptors_size = FeatureExtractor.get_extraction_algorithm()
+        algorithm = cv2.xfeatures2d.SIFT_create()
 
-        # Finding image keypoints
-        key_points = algorithm.detect(image)
-
-        # Getting first 32 of them.
-        # Number of keypoints is varies depend on image size and color pallet
-        # Sorting them based on keypoint response value(bigger is better)
-        key_points = sorted(key_points, key=lambda x: -x.response)[:vector_size]
-
-        # computing descriptors vector
-        key_points, descriptors = algorithm.compute(image, key_points)
+        key_points, descriptors = algorithm.detectAndCompute(image, None)
 
         if descriptors is None:
-            return np.zeros(vector_size * descriptors_size)
+            return None
 
-        # Flatten all of them in one big vector - our feature vector
-        descriptors = descriptors.flatten()
+        dense_descriptors = list(map(lambda descriptor: (ml.DenseVector(descriptor.tolist()), label), descriptors))
 
-        # Making descriptor of same size
-        needed_size = (vector_size * descriptors_size)
+        return dense_descriptors
 
-        if descriptors.size < needed_size:
-            # if we have less the 32 descriptors then just adding zeros at the
-            # end of our feature vector
-            descriptors = np.concatenate([descriptors, np.zeros(needed_size - descriptors.size)])
+    @staticmethod
+    def find_key_points_in_image(item):
 
-        return descriptors
+        algorithm = cv2.xfeatures2d.SIFT_create()
+        label = item[0]
+        key_points, descriptors = algorithm.detectAndCompute(item[1], None)
+
+        if descriptors is None:
+            return list([(ml.DenseVector([]), label)])
+
+        dense_descriptors = list(map(lambda descriptor: (ml.DenseVector(descriptor.tolist()), label), descriptors))
+
+        return dense_descriptors
