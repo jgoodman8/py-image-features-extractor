@@ -1,9 +1,9 @@
 import csv
 import os
-from pathlib import Path
 
 import cv2
 import sh
+from pathlib import Path
 from pyspark.ml.image import ImageSchema
 from pyspark.sql import functions
 
@@ -16,47 +16,81 @@ class ImageUtils:
 
     @staticmethod
     def load_train_data(base_path):
+        """
+        [Not currently used]
+        Loads the train data set as a DataFrame from the base imagenet folder
+
+        :param base_path: Base imagenet folder
+        :return: Train DataFrame with label and image columns
+        """
+
         train_folder = Path(base_path + '/train')
 
-        return ImageUtils.load_data(train_folder)
+        return ImageUtils._build_train_df(train_folder)
 
     @staticmethod
-    def load_test_data(base_path):
-        test_folder = Path(base_path + '/train')
+    def _build_train_df(folder):
+        """
+        Creates a data frame by using the images and labels inside the given folder
 
-        return ImageUtils.load_data(test_folder)
+        :param folder: Train imagenet folder string
+        :return: DataFrame with label and image columns
+        """
 
-    @staticmethod
-    def load_data(folder):
-        image_class_folders = [dir for dir in folder.iterdir() if dir.is_dir()]
+        image_class_folders = [class_folder for class_folder in folder.iterdir() if class_folder.is_dir()]
 
-        data = ImageUtils.create_image_df_with_label(image_class_folders[0])
+        data = ImageUtils._create_image_df_with_label(image_class_folders[0])
 
         for label_index in range(1, len(image_class_folders)):
-            data_slice = ImageUtils.create_image_df_with_label(image_class_folders[label_index])
+            data_slice = ImageUtils._create_image_df_with_label(image_class_folders[label_index])
             data = data.unionAll(data_slice)
 
         return data
 
     @staticmethod
-    def find_images_path(folder):
-        return os.path.abspath(folder._str + '/images')
+    def _find_images_path(folder):
+        """
+        Finds the image folder withing a labeled image class, in train data set
+
+        :param folder: A image class route string
+        :return: Image folder route
+        """
+
+        return os.path.abspath(str(folder) + '/images')
 
     @staticmethod
-    def create_image_df_with_label(image_folder):
+    def _create_image_df_with_label(image_folder):
+        """
+        Creates a image data frame for a given image class (same label)
+
+        :param image_folder: Folder which contains a single type of images
+        :return: DataFrame with label and image columns (all with same label)
+        """
+
         label = int(image_folder.stem[1:])
-        path = ImageUtils.find_images_path(image_folder)
+        path = ImageUtils._find_images_path(image_folder)
 
         return ImageSchema.readImages(path).withColumn('label', functions.lit(label))
 
     @staticmethod
-    def list_hdfs_content(path):
+    def _list_hdfs_content(path):
+        """
+        [Not currently used]
+        Utility to get a list of the items within a HDFS path
+
+        :param path: A valid HDFS folder path
+        :return: List of the contained items as string routes
+        """
 
         return [line.rsplit(None, 1)[-1] for line in sh.hdfs('dfs', '-ls', path).split('\n') if
                 len(line.rsplit(None, 1))][1:]
 
+    # =============================
+    # OpenCV related methods bellow
+    # =============================
+
     @staticmethod
-    def add_image_labels(image_path):
+    def _add_image_labels(image_path):
         """
         Obtains the image label, for a given image route.
 
@@ -68,7 +102,7 @@ class ImageUtils:
         return image_path, label
 
     @staticmethod
-    def add_image_matrix(image_tuple):
+    def _add_image_matrix(image_tuple):
         """
         Obtains the image data from a given image route
 
@@ -83,7 +117,7 @@ class ImageUtils:
         return label, image, route
 
     @staticmethod
-    def get_test_labels(file_route):
+    def _get_test_labels(file_route):
         """
         Loads the test labels from the test data set.
 
@@ -112,11 +146,11 @@ class ImageUtils:
 
         class_folders = [class_folder for class_folder in train_path.iterdir()]
         image_routes = [str(img) for image_dir in class_folders for img in Path(str(image_dir) + "/images").iterdir()]
-        labeled_image_routes = list(map(ImageUtils.add_image_labels, image_routes))
+        labeled_image_routes = list(map(ImageUtils._add_image_labels, image_routes))
 
         labeled_image_routes_df = self.spark.createDataFrame(labeled_image_routes)
 
-        return labeled_image_routes_df.rdd.map(ImageUtils.add_image_matrix)
+        return labeled_image_routes_df.rdd.map(ImageUtils._add_image_matrix)
 
     def load_test_data_as_matrix(self):
         """
@@ -129,10 +163,10 @@ class ImageUtils:
         test_annotations_route = self.base_path + "/val/val_annotations.txt"
 
         test_image_routes = [str(image_path) for image_path in test_images_path.iterdir()]
-        test_image_labels = ImageUtils.get_test_labels(test_annotations_route)
+        test_image_labels = ImageUtils._get_test_labels(test_annotations_route)
 
         labeled_images_routes = list(zip(test_image_routes, test_image_labels))
 
         test_labeled_paths_rdd = self.spark.createDataFrame(labeled_images_routes)
 
-        return test_labeled_paths_rdd.rdd.map(ImageUtils.add_image_matrix)
+        return test_labeled_paths_rdd.rdd.map(ImageUtils._add_image_matrix)

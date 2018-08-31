@@ -7,6 +7,8 @@ from feature_builder import FeatureBuilder
 from feature_extractor import FeatureExtractor
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 
+extraction_algorithm = FeatureExtractor.SIFT
+
 if __name__ == '__main__':
     os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-8-openjdk-amd64'
 
@@ -25,20 +27,21 @@ if __name__ == '__main__':
     test = image_utils.load_test_data_as_matrix()
 
     # Feature detection
+
     bag_of_descriptors_rdd = train \
-        .flatMap(FeatureExtractor.find_key_points_in_image) \
+        .flatMap(FeatureExtractor.extract_descriptors_from_image) \
         .filter(lambda item: len(item[0]) > 0)
 
     bow_model = Model(train, None, spark)
     k_means_model = bow_model.create_k_means_model()
 
     train_with_descriptors_rdd = train \
-        .map(FeatureExtractor.extract_features_from_image) \
+        .map(FeatureExtractor.extract_descriptors_from_image) \
         .filter(lambda row: row is not None)
     train_with_descriptors = train_with_descriptors_rdd.collect()
 
     test_with_descriptors_rdd = test \
-        .map(FeatureExtractor.extract_features_from_image) \
+        .map(FeatureExtractor.extract_descriptors_from_image) \
         .filter(lambda row: row is not None)
     test_with_descriptors = test_with_descriptors_rdd.collect()
 

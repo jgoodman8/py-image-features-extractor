@@ -2,70 +2,42 @@ import cv2
 
 import pyspark.ml.linalg as ml
 
-kaze = cv2.KAZE_create()
-sift = cv2.xfeatures2d.SIFT_create()
+from feature_selector import extraction_algorithm
 
 
 class FeatureExtractor:
+    SIFT = "SIFT"
+    SURF = "SURF"
 
-    def __init__(self, train, test, spark, k, model):
+    def __init__(self, train, test):
         self.train = train
         self.test = test
 
         self.train_with_features = None
         self.test_with_features = None
 
-    @staticmethod
-    def perform_sift_extraction(data):
-        label = data[0]
-        image = data[1]
-
-        key_points, descriptors = sift.detectAndCompute(image, None)
-
-        return label, descriptors
-
-    @staticmethod
-    def get_labels(train_with_descriptors):
-        return list(map(lambda item: item[0], train_with_descriptors))
-
-    @staticmethod
-    def get_descriptors(train_with_descriptors):
-        return list(map(lambda item: item[1], train_with_descriptors))
-
-    @staticmethod
-    def extract_features_from_data(data):
-        return data[0], ml.DenseVector(FeatureExtractor.extract_features_from_image(data[1]).tolist())
-
     def extract_features(self):
-        self.train_with_features = self.train.map(FeatureExtractor.extract_features_from_data)
-        self.test_with_features = self.test.map(FeatureExtractor.extract_features_from_data)
+        """
+        Transforms the train and test sets into data sets with extracted descriptors
+        """
+
+        self.train_with_features = self.train.map(FeatureExtractor._extract_descriptors_from_data)
+        self.test_with_features = self.test.map(FeatureExtractor._extract_descriptors_from_data)
 
     @staticmethod
-    def get_extraction_algorithm():
-        return sift, 128
+    def extract_descriptors_from_image(data):
+        """
+        Extracts descriptors related to the key-points detected by the used algorithm (SIFT, SURF...)
 
-    @staticmethod
-    def extract_features_from_image(data):
+        :param data: Tuple that contains (label, image data)
+        :return: List of dense descriptors (the descriptor length varies depending on the used algorithm) or None if no
+                 key points have been detected
+        """
+
         label = data[0]
         image = data[1]
 
-        algorithm = cv2.xfeatures2d.SIFT_create()
-
-        key_points, descriptors = algorithm.detectAndCompute(image, None)
-
-        if descriptors is None:
-            return None
-
-        dense_descriptors = list(map(lambda descriptor: (ml.DenseVector(descriptor.tolist()), label), descriptors))
-
-        return dense_descriptors
-
-    @staticmethod
-    def find_key_points_in_image(item):
-
-        algorithm = cv2.xfeatures2d.SIFT_create()
-        label = item[0]
-        key_points, descriptors = algorithm.detectAndCompute(item[1], None)
+        key_points, descriptors = FeatureExtractor._get_extraction_algorithm().detectAndCompute(image, None)
 
         if descriptors is None:
             return list([(ml.DenseVector([]), label)])
@@ -73,3 +45,32 @@ class FeatureExtractor:
         dense_descriptors = list(map(lambda descriptor: (ml.DenseVector(descriptor.tolist()), label), descriptors))
 
         return dense_descriptors
+
+    @staticmethod
+    def _extract_descriptors_from_data(data):
+        """
+        Extracts descriptors from a given data instance
+
+        :param data: A single data instance (label, image)
+        :return:
+        """
+
+        label = data[0]
+
+        return label, ml.DenseVector(FeatureExtractor.extract_descriptors_from_image(data))
+
+    @staticmethod
+    def _get_extraction_algorithm():
+        """
+        Gets an OpenCV feature detection algorithm instance, depending on the value set on the global variable
+        'extraction_algorithm'.
+
+        :return: A feature detection algorithm
+        """
+
+        switcher = {
+            FeatureExtractor.SIFT: cv2.xfeatures2d.SIFT_create(),
+            FeatureExtractor.SURF: cv2.xfeatures2d.SURF_create(),
+        }
+
+        return switcher.get(extraction_algorithm)
