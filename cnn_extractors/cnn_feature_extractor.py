@@ -44,7 +44,8 @@ class FeatureExtractor:
     for label, folder in enumerate(os.listdir(folder)):
       dictionary_labels[folder] = label
     
-    self.labels = np.array([FeatureExtractor.__get_label_from_file__(f, dictionary_labels) for f in directory_iterator])
+    self.labels = np.array(
+      [FeatureExtractor.__get_label_from_file__(f, dictionary_labels) for f in directory_iterator.filenames])
   
   def save_csv(self):
     features_list = [i for i in range(self.features.shape[-1])]
