@@ -9,7 +9,7 @@ from tensorflow.keras.preprocessing import image
 class FeatureExtractor:
   def __init__(self, base_route, model_name, output_route):
     self.bath_size = 128
-    self.width = self.height = 75
+    self.width = self.height = 139
     self.image_shape = (self.width, self.height, 3)
     
     self.output_route = output_route
@@ -32,11 +32,11 @@ class FeatureExtractor:
     )
   
   def get_model(self):
-    if self.model_name is "inception":
-      return InceptionV3(include_top=False, weigths="imagenet", input_shape=self.image_shape)
+    if self.model_name == "inception":
+      return InceptionV3(include_top=False, weights="imagenet", input_shape=self.image_shape)
   
   def get_features(self, model):
-    model = model.compile(optimizer="adagrad", loss="categorical_crossentropy", metrics=["accuracy"])
+    model.compile(optimizer="adagrad", loss="categorical_crossentropy", metrics=["accuracy"])
     self.features = model.predict_generator(self.directory_iterator)
   
   def get_labels(self, folder, directory_iterator):
