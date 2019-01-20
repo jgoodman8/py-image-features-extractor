@@ -3,6 +3,8 @@ import os
 
 import numpy as np
 from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
+from tensorflow.keras.applications.vgg19 import VGG19
 from tensorflow.keras.preprocessing import image
 
 
@@ -32,8 +34,14 @@ class FeatureExtractor:
     )
   
   def get_model(self):
-    if self.model_name == "inception":
+    if self.model_name == "inception_v3":
       return InceptionV3(include_top=False, weights="imagenet", input_shape=self.image_shape)
+    elif self.model_name == "inception_resnet_v2":
+      return InceptionResNetV2(include_top=False, weights="imagenet", input_shape=self.image_shape)
+    elif self.model_name == "vgg19":
+      return VGG19(include_top=False, weights="imagenet", input_shape=self.image_shape)
+    else:
+      raise Exception("Invalid pre-trained Keras Application")
   
   def get_features(self, model):
     model.compile(optimizer="adagrad", loss="categorical_crossentropy", metrics=["accuracy"])
