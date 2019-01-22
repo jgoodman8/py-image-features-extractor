@@ -1,10 +1,10 @@
 import os
 from pyspark.sql import SparkSession
 
-from model import Model
-from image_utils import ImageUtils
-from feature_builder import FeatureBuilder
-from feature_extractor import FeatureExtractor
+from other.model import Model
+from other.image_utils import ImageUtils
+from other.feature_builder import FeatureBuilder
+from other.feature_extractor import FeatureExtractor
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 
 extraction_algorithm = FeatureExtractor.SIFT

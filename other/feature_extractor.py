@@ -2,7 +2,7 @@ import cv2
 
 import pyspark.ml.linalg as ml
 
-from feature_selector import extraction_algorithm
+from other.feature_selector import extraction_algorithm
 
 
 class FeatureExtractor:

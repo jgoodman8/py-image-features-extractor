@@ -33,7 +33,7 @@ class FeatureExtractor:
       shuffle=False
     )
   
-  def get_model(self):
+  def get_extractor_model(self):
     if self.model_name == "inception_v3":
       return InceptionV3(include_top=False, weights="imagenet", input_shape=self.image_shape)
     elif self.model_name == "inception_resnet_v2":
@@ -72,7 +72,7 @@ class FeatureExtractor:
   def extract(self):
     self.get_directory_iterator(self.train_route)
     self.get_labels(self.train_route, self.directory_iterator)
-    self.get_features(self.get_model())
+    self.get_features(self.get_extractor_model())
     self.save_csv()
   
   @staticmethod
