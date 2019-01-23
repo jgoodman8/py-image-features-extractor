@@ -21,7 +21,7 @@ class ImageModel:
   
   def train(self):
     input_tensor = Input(shape=(self.width, self.height, 3))
-    model = InceptionV3(input_tensor=input_tensor, weigths='imagenet', include_top=True, classes=200)
+    model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=True, classes=200)  # TODO: wrong instance
     
     model.compile()
     
