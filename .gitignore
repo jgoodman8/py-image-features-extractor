@@ -4,3 +4,4 @@ __pycache__
 tiny-imagenet-200
 *.csv
 .ipynb_checkpoints/
+*.pyc
