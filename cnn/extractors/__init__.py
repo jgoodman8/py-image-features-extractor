@@ -1,5 +1,5 @@
 import sys
-from cnn.extractors.feature_extractor import FeatureExtractor
+from . feature_extractor import FeatureExtractor
 
 data_route = sys.argv[1]
 model_name = sys.argv[2]

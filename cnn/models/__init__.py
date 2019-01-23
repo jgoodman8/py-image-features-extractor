@@ -1,11 +1,10 @@
 import sys
 
-from cnn.models.image_model import ImageModel
+from . import image_model
 
 data_route = sys.argv[1]
-model_name = sys.argv[2]
 
-extractor = ImageModel(data_route)
+extractor = image_model.ImageModel(data_route)
 metrics = extractor.train()
 
 print(metrics)
