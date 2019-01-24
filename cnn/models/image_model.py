@@ -4,16 +4,21 @@ from tensorflow.keras.applications.vgg19 import VGG19
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import GlobalAveragePooling2D
+from tensorflow.keras.layers import Flatten
 from tensorflow.keras.models import Model
-from tensorflow.keras.preprocessing import image
 from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.preprocessing import image
 
 
 class ImageModel:
   def __init__(self, base_route):
     self.width = self.height = 64
     self.train_route = base_route + "/train"
+    
+    self.epochs = 10
+    self.batch_size = 256
+    self.train_size = 100000
+    self.steps_per_epoch = math.ceil(self.train_size / self.batch_size)
     
     self.early = EarlyStopping(
       monitor='val_acc',
@@ -42,9 +47,9 @@ class ImageModel:
     return image_generator.flow_from_directory(
       directory=route,
       target_size=(self.width, self.height),
-      batch_size=16,
-      class_mode=None,
-      shuffle=False
+      batch_size=self.batch_size,
+      class_mode="categorical",
+      shuffle=True
     )
   
   def set_model(self):
@@ -56,7 +61,7 @@ class ImageModel:
     # add a global spatial average pooling layer
     x = base_model.output
     
-    x = GlobalAveragePooling2D()(x)
+    x = Flatten()(x)
     # let's add a fully-connected layer
     x = Dense(1024, activation='relu')(x)
     # and a logistic layer -- let's say we have 200 classes
@@ -66,12 +71,6 @@ class ImageModel:
     self.model = Model(inputs=base_model.input, outputs=predictions)
   
   def train(self):
-    epochs = 10
-    batch_size = 256
-    train_size = 100000
-    validation_size = 10000
-    steps_per_epoch = math.ceil(train_size / batch_size)
-    validation_steps = math.ceil(validation_size / batch_size)
     
     self.set_model()
     self.model.summary()
@@ -81,10 +80,10 @@ class ImageModel:
     
     self.model.fit_generator(
       directory_iterator,
-      steps_per_epoch=steps_per_epoch,
+      steps_per_epoch=self.steps_per_epoch,
       epochs=10,
       # validation_data=validation_generator,
-      validation_steps=validation_steps,
+      # validation_steps=self.validation_steps,
       callbacks=[self.checkpoint, self.early]
     )
     
@@ -97,10 +96,10 @@ class ImageModel:
     
     self.model.fit_generator(
       directory_iterator,
-      steps_per_epoch=steps_per_epoch,
-      epochs=epochs,
+      steps_per_epoch=self.steps_per_epoch,
+      epochs=self.epochs,
       # validation_data=validation_generator,
-      validation_steps=validation_steps,
+      # validation_steps=self.validation_steps,
       callbacks=[self.checkpoint, self.early]
     )
     
