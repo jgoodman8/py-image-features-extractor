@@ -14,12 +14,14 @@ class ImageModel:
   def __init__(self, base_route):
     self.width = self.height = 64
     self.train_route = base_route + "/train"
-    self.train_route = base_route + "/val"
+    self.validation_route = base_route + "/validation"
     
     self.epochs = 10
     self.batch_size = 256
     self.train_size = 100000
+    self.validation_size = 10000
     self.steps_per_epoch = math.ceil(self.train_size / self.batch_size)
+    self.validation_steps = math.ceil(self.validation_size / self.batch_size)
     
     self.early = EarlyStopping(
       monitor='val_acc',
@@ -75,16 +77,17 @@ class ImageModel:
     
     self.set_model()
     self.model.summary()
-    self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+    self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=["accuracy"])
     
-    directory_iterator = self.get_directory_iterator(self.train_route)
+    train_directory_iterator = self.get_directory_iterator(self.train_route)
+    validation_directory_iterator = self.get_directory_iterator(self.validation_route)
     
     self.model.fit_generator(
-      directory_iterator,
+      train_directory_iterator,
       steps_per_epoch=self.steps_per_epoch,
       epochs=10,
-      # validation_data=validation_generator,
-      # validation_steps=self.validation_steps,
+      validation_data=validation_directory_iterator,
+      validation_steps=self.validation_steps,
       callbacks=[self.checkpoint, self.early]
     )
     
@@ -93,15 +96,15 @@ class ImageModel:
     for layer in self.model.layers[self.base_layers_size:]:
       layer.trainable = True
     
-    self.model.compile(optimizer=SGD(lr=0.0001, momentum=0.9), loss='categorical_crossentropy')
+    self.model.compile(optimizer=SGD(lr=0.0001, momentum=0.9), loss='categorical_crossentropy', metrics=["accuracy"])
     
     self.model.fit_generator(
-      directory_iterator,
+      train_directory_iterator,
       steps_per_epoch=self.steps_per_epoch,
       epochs=self.epochs,
-      # validation_data=validation_generator,
-      # validation_steps=self.validation_steps,
+      validation_data=validation_directory_iterator,
+      validation_steps=self.validation_steps,
       callbacks=[self.checkpoint, self.early]
     )
     
-    return self.model.evaluate_generator(directory_iterator)
+    return self.model.evaluate_generator(train_directory_iterator)
