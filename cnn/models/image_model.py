@@ -14,6 +14,7 @@ class ImageModel:
   def __init__(self, base_route):
     self.width = self.height = 64
     self.train_route = base_route + "/train"
+    self.train_route = base_route + "/val"
     
     self.epochs = 10
     self.batch_size = 256

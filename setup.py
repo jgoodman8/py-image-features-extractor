@@ -3,6 +3,7 @@ from setuptools import setup, find_packages, Command
 import cnn
 from cnn.extractors.feature_extractor import FeatureExtractor
 from cnn.models.image_model import ImageModel
+from cnn.utils import change_validation_scaffolding
 
 
 class Train(Command):
@@ -47,6 +48,20 @@ class Extract(Command):
     extractor.extract()
 
 
+class ChangeValidationScaffolding(Command):
+  description = 'Changes the validation scaffolding'
+  user_options = [('route=', None, 'Training base route')]
+  
+  def initialize_options(self):
+    self.route = ''
+  
+  def finalize_options(self):
+    pass
+  
+  def run(self):
+    change_validation_scaffolding(self.route)
+
+
 setup(
   name='py-image-feature-extractor',
   version=cnn.__version__,
@@ -55,11 +70,13 @@ setup(
   packages=find_packages(),
   setup_requires=[
     'numpy',
-    'tensorflow'
+    'tensorflow',
+    'pandas'
   ],
   url='https://github.com/jgoodman8/py-image-feature-selector',
   cmdclass={
     'train': Train,
-    'extract': Extract
+    'extract': Extract,
+    'change_scaffolding': ChangeValidationScaffolding
   }
 )
