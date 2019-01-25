@@ -16,6 +16,9 @@ def change_validation_scaffolding(validation_base_route):
     
     shutil.move(src, std)
 
+  os.rmdir(validation_base_route + "/images")
+  os.rmdir(validation_base_route + "/val_annotations.txt")
+
 
 def __load_validation_data(validation_base_route):
   headers = ["file", "label", "0", "1", "2", "3"]
