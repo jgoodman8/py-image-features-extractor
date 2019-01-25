@@ -9,37 +9,23 @@ from tensorflow.keras.preprocessing import image
 
 
 class ImageModel:
-  def __init__(self, base_route):
+  def __init__(self, base_route, train_folder="train", validation_folder="validation"):
     self.width = self.height = 64
-    self.train_route = base_route + "/train"
-    self.validation_route = base_route + "/validation"
+    self.train_route = base_route + "/" + train_folder
+    self.validation_route = base_route + "/" + validation_folder
     
     self.epochs = 1000
-    self.batch_size = 256
-    self.train_size = 100000
-    self.validation_size = 10000
-    self.steps_per_epoch = math.ceil(self.train_size / self.batch_size)
-    self.validation_steps = math.ceil(self.validation_size / self.batch_size)
+    self.__batch_size = 256
     
-    self.early = EarlyStopping(
-      monitor='val_acc',
-      min_delta=0,
-      patience=10,
-      verbose=1,
-      mode='auto'
-    )
-    
-    self.checkpoint = ModelCheckpoint(
-      "vgg16.h5",
-      monitor='val_acc',
-      verbose=1,
-      save_best_only=True,
-      save_weights_only=False,
-      mode='auto',
-      period=1
-    )
+    self.model_route = "model.h5"
+    self.early = ImageModel.get_early_stop()
+    self.checkpoint = self.get_model_checkpoint()
     
     self.model = None
+    self.__train_size = 0
+    self.__validation_size = 0
+    self.train_steps = 0
+    self.validation_steps = 0
   
   def get_directory_iterator(self, route):
     image_generator = image.ImageDataGenerator(rescale=1.0 / 255)
@@ -51,7 +37,7 @@ class ImageModel:
       class_mode="categorical"
     )
   
-  def set_model(self):
+  def build_model(self, number_of_classes):
     # create the base pre-trained model
     base_model = VGG19(weights='imagenet', include_top=False, input_shape=(self.width, self.height, 3))
     
@@ -67,26 +53,29 @@ class ImageModel:
     x = Dropout(0.5)(x)
     x = Dense(1024, activation='relu')(x)
     # and a logistic layer -- let's say we have 200 classes
-    predictions = Dense(200, activation='softmax')(x)
+    predictions = Dense(number_of_classes, activation='softmax')(x)
     
     # this is the model we will train
     self.model = Model(inputs=base_model.input, outputs=predictions)
-  
-  def train(self):
-    self.set_model()
-    self.model.summary()
+    
     self.model.compile(
       optimizer=Adam(),
       loss='categorical_crossentropy',
       metrics=["accuracy"]
     )
-    
+  
+  def train(self):
     train_directory_iterator = self.get_directory_iterator(self.train_route)
+    self.train_size = train_directory_iterator.samples
+    
     validation_directory_iterator = self.get_directory_iterator(self.validation_route)
+    self.validation_size = validation_directory_iterator.samples
+    
+    self.build_model(train_directory_iterator.num_classes)
     
     self.model.fit_generator(
       train_directory_iterator,
-      steps_per_epoch=self.steps_per_epoch,
+      steps_per_epoch=self.train_steps,
       epochs=self.epochs,
       validation_data=validation_directory_iterator,
       validation_steps=self.validation_steps,
@@ -94,3 +83,52 @@ class ImageModel:
     )
     
     return self.model.evaluate_generator(train_directory_iterator)
+  
+  def get_model_checkpoint(self):
+    return ModelCheckpoint(
+      self.model_route,
+      monitor='val_acc',
+      verbose=1,
+      save_best_only=True,
+      save_weights_only=False,
+      mode='auto',
+      period=1
+    )
+  
+  @staticmethod
+  def get_early_stop():
+    return EarlyStopping(
+      monitor='val_acc',
+      min_delta=0,
+      patience=10,
+      verbose=1,
+      mode='auto'
+    )
+  
+  @property
+  def train_size(self):
+    return self.__train_size
+  
+  @train_size.setter
+  def train_size(self, train_size):
+    self.__train_size = train_size
+    self.train_steps = math.ceil(self.train_size / self.batch_size)
+  
+  @property
+  def validation_size(self):
+    return self.__validation_size
+  
+  @validation_size.setter
+  def validation_size(self, validation_size):
+    self.__validation_size = validation_size
+    self.validation_steps = math.ceil(self.validation_size / self.batch_size)
+  
+  @property
+  def batch_size(self):
+    return self.__batch_size
+  
+  @batch_size.setter
+  def batch_size(self, batch_size):
+    self.__batch_size = batch_size
+    self.train_steps = math.ceil(self.train_size / self.batch_size)
+    self.validation_steps = math.ceil(self.validation_size / self.batch_size)
