@@ -32,20 +32,25 @@ class Extract(Command):
   user_options = [
     ('route=', None, 'Training base route'),
     ('model=', None, 'Name of the required model (inception_v3, inception_resnet_v2, vgg19)'),
-    ('output=', None, 'Route to the output file')
+    ('output=', None, 'Route to the output file'),
+    ('size=', None, 'Image bigger side\'s dimension')
   ]
   
   def initialize_options(self):
     self.route = ''
     self.model = ''
     self.output = ''
+    self.size = 0
   
   def finalize_options(self):
     pass
   
   def run(self):
-    extractor = FeatureExtractor(self.data_route, self.model_name, self.output)
-    extractor.extract()
+    extractor = FeatureExtractor(self.route, self.model, self.output)
+    if int(self.size) > 0:
+      extractor.width = int(self.size)
+      extractor.height = int(self.size)
+    extractor.extract_and_store()
 
 
 class ChangeValidationScaffolding(Command):

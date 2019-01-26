@@ -27,16 +27,6 @@ class ImageModel:
     self.train_steps = 0
     self.validation_steps = 0
   
-  def get_directory_iterator(self, route):
-    image_generator = image.ImageDataGenerator(rescale=1.0 / 255)
-    
-    return image_generator.flow_from_directory(
-      directory=route,
-      target_size=(self.width, self.height),
-      batch_size=self.batch_size,
-      class_mode="categorical"
-    )
-  
   def build_model(self, number_of_classes):
     # create the base pre-trained model
     base_model = VGG19(weights='imagenet', include_top=False, input_shape=(self.width, self.height, 3))
@@ -65,10 +55,10 @@ class ImageModel:
     )
   
   def train(self):
-    train_directory_iterator = self.get_directory_iterator(self.train_route)
+    train_directory_iterator = ImageModel.get_directory_iterator(self.train_route)
     self.train_size = train_directory_iterator.samples
     
-    validation_directory_iterator = self.get_directory_iterator(self.validation_route)
+    validation_directory_iterator = ImageModel.get_directory_iterator(self.validation_route)
     self.validation_size = validation_directory_iterator.samples
     
     self.build_model(train_directory_iterator.num_classes)
@@ -103,6 +93,17 @@ class ImageModel:
       patience=10,
       verbose=1,
       mode='auto'
+    )
+
+  @staticmethod
+  def get_directory_iterator(route):
+    image_generator = image.ImageDataGenerator(rescale=1.0 / 255)
+  
+    return image_generator.flow_from_directory(
+      directory=route,
+      target_size=(64, 64),
+      batch_size=64,
+      class_mode="categorical"
     )
   
   @property
