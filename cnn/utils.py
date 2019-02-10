@@ -2,32 +2,28 @@ import os, shutil
 import pandas as pd
 
 
-def change_validation_scaffolding(validation_base_route):
-  validation_data = __load_validation_data(validation_base_route)
-  for label in validation_data["label"].unique():
-    os.mkdir(validation_base_route + "/" + label)
+def change_validation_scaffolding(base_route, definition_file, separator):
+  validation_data = __load_validation_data(definition_file, separator)
   
   for row in validation_data.iterrows():
     file = row[1]["file"]
     label = row[1]["label"]
     
-    src = validation_base_route + "/images/" + file
-    std = validation_base_route + "/" + label + "/" + file
+    label_folder = os.path.join(base_route, label)
     
-    shutil.move(src, std)
+    if not os.path.exists(label_folder):
+      os.mkdir(label_folder)
+    
+    shutil.move(os.path.join(base_route, file), os.path.join(label_folder, file))
 
-  os.rmdir(validation_base_route + "/images")
-  os.rmdir(validation_base_route + "/val_annotations.txt")
 
-
-def __load_validation_data(validation_base_route):
-  headers = ["file", "label", "0", "1", "2", "3"]
+def __load_validation_data(definition_file, separator):
   validation_data = pd.read_csv(
-    validation_base_route + "/val_annotations.txt",
-    sep='\t',
+    definition_file,
+    sep=separator,
     header=None
   )
   
-  validation_data.columns = headers
+  validation_data.columns = ["file", "label", "0", "1", "2", "3"]
   
   return validation_data

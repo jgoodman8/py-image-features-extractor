@@ -55,16 +55,22 @@ class Extract(Command):
 
 class ChangeValidationScaffolding(Command):
   description = 'Changes the validation scaffolding'
-  user_options = [('route=', None, 'Training base route')]
+  user_options = [
+    ('route=', None, 'Training base route'),
+    ('definition_file=', None, 'Route to the file with the image matches'),
+    ('separator=', None, 'Training base route'),
+  ]
   
   def initialize_options(self):
     self.route = ''
+    self.definition_file = ''
+    self.separator = ','
   
   def finalize_options(self):
     pass
   
   def run(self):
-    change_validation_scaffolding(self.route)
+    change_validation_scaffolding(self.route, self.definition_file, self.separator)
 
 
 setup(
@@ -76,7 +82,8 @@ setup(
   setup_requires=[
     'numpy',
     'tensorflow',
-    'pandas'
+    'pandas',
+    'shutil'
   ],
   url='https://github.com/jgoodman8/py-image-feature-selector',
   cmdclass={
