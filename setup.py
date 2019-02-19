@@ -76,14 +76,13 @@ class ChangeValidationScaffolding(Command):
 setup(
   name='py-image-feature-extractor',
   version=cnn.__version__,
-  author='Javier Guzmán',
+  author='Javier Guzman',
   author_email='jguzmanfd@gmail.com',
   packages=find_packages(),
   setup_requires=[
     'numpy',
     'tensorflow',
     'pandas',
-    'shutil'
   ],
   url='https://github.com/jgoodman8/py-image-feature-selector',
   cmdclass={
