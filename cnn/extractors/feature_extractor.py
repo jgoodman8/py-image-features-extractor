@@ -83,18 +83,18 @@ class FeatureExtractor:
         writer.writerow(row)
   
   def extract_and_store(self):
-    tpu_url = TPUClusterResolver(tpu=[os.environ['TPU_NAME']]).get_master()
-    with tf.Session(tpu_url) as session:
-      set_session(session)
-      
-      self.get_directory_iterator(self.train_route)
-      self.set_extractor_model()
-      
-      print("Extracting...")
-      self.extract()
-      
-      print("Saving...")
-      self.save_csv()
+    # tpu_url = TPUClusterResolver(tpu=[os.environ['TPU_NAME']]).get_master()
+    # with tf.Session(tpu_url) as session:
+    #   set_session(session)
+    
+    self.get_directory_iterator(self.train_route)
+    self.set_extractor_model()
+    
+    print("Extracting...")
+    self.extract()
+    
+    print("Saving...")
+    self.save_csv()
   
   @property
   def width(self):
