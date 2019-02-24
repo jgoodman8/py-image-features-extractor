@@ -1,3 +1,4 @@
+import os
 import math
 
 from tensorflow.keras.applications.vgg19 import VGG19
@@ -11,8 +12,8 @@ from tensorflow.keras.preprocessing import image
 class ImageModel:
   def __init__(self, base_route, train_folder="train", validation_folder="validation"):
     self.width = self.height = 64
-    self.train_route = base_route + "/" + train_folder
-    self.validation_route = base_route + "/" + validation_folder
+    self.train_route = os.path.join(base_route, train_folder)
+    self.validation_route = os.path.join(base_route, validation_folder)
     
     self.epochs = 1000
     self.__batch_size = 256
@@ -53,6 +54,16 @@ class ImageModel:
       loss='categorical_crossentropy',
       metrics=["accuracy"]
     )
+    
+  def fine_tune(self):
+    for layer in self.model.layers:
+      layer.trainable = True
+      
+    self.model.compile(
+      optimizer=Adam(),
+      loss='categorical_crossentropy',
+      metrics=["accuracy"]
+    )
   
   def train(self):
     train_directory_iterator = ImageModel.get_directory_iterator(self.train_route)
@@ -71,6 +82,19 @@ class ImageModel:
       validation_steps=self.validation_steps,
       callbacks=[self.checkpoint, self.early]
     )
+    
+    self.fine_tune()
+    
+    self.model.fit_generator(
+      train_directory_iterator,
+      steps_per_epoch=self.train_steps,
+      epochs=self.epochs,
+      validation_data=validation_directory_iterator,
+      validation_steps=self.validation_steps,
+      callbacks=[self.checkpoint, self.early]
+    )
+    
+    self.model.save("vgg19_model.h5")
     
     return self.model.evaluate_generator(train_directory_iterator)
   

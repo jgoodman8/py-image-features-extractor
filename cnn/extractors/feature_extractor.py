@@ -1,13 +1,9 @@
 import csv
-import os
 
 import numpy as np
-import tensorflow as tf
-from tensorflow.contrib.cluster_resolver import TPUClusterResolver
 from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
 from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.backend import set_session
 from tensorflow.keras.preprocessing import image
 
 
@@ -83,9 +79,6 @@ class FeatureExtractor:
         writer.writerow(row)
   
   def extract_and_store(self):
-    # tpu_url = TPUClusterResolver(tpu=[os.environ['TPU_NAME']]).get_master()
-    # with tf.Session(tpu_url) as session:
-    #   set_session(session)
     
     self.get_directory_iterator(self.train_route)
     self.set_extractor_model()
