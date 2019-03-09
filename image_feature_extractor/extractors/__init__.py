@@ -1,0 +1,1 @@
+from image_feature_extractor.extractors.feature_extractor import FeatureExtractor

@@ -1,0 +1,1 @@
+from image_feature_extractor.models.image_model import ImageModel
