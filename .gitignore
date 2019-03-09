@@ -5,3 +5,5 @@ tiny-imagenet-200
 *.csv
 .ipynb_checkpoints/
 *.pyc
+.eggs/**
+**.h5
