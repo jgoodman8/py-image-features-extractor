@@ -11,8 +11,7 @@ from tensorflow.keras.preprocessing import image
 
 
 class ImageModel:
-    def __init__(self, base_route, train_folder="train", validation_folder="val", epochs=10,
-                 fine_tune_epochs=100, fine_tune: bool = False):
+    def __init__(self, base_route, train_folder="train", validation_folder="val", epochs=10, fine_tune: bool = False):
         self.__model = None
         self.__base_model = None
         self.__width = self.__height = 64
@@ -22,7 +21,6 @@ class ImageModel:
         self.__fine_tuning = fine_tune
         
         self.__epochs = epochs
-        self.__fine_tune_epochs = fine_tune_epochs
         self.__batch_size = 256
         
         self.__model_route = "model.h5"
@@ -51,7 +49,7 @@ class ImageModel:
         self.__model.fit_generator(
             train_directory_iterator,
             steps_per_epoch=self.train_steps,
-            epochs=self.__fine_tune_epochs,
+            epochs=self.__epochs,
             validation_data=validation_directory_iterator,
             validation_steps=self.validation_steps,
             callbacks=[self.__checkpoint, self.__early_stop]

@@ -13,19 +13,20 @@ from image_feature_extractor.utils import change_validation_scaffolding
 @click.option('--model', type=str, help="[Train/Extract] Model used to train model or extract features")
 @click.option('--output-route', type=str, help="[Extract] Output route for features csv file")
 @click.option('--image-size', type=int, help="[Extract] Image size for (height, width)")
+@click.option('--train-folder', type=str, default="train", help="[Train] Folder name for train data")
+@click.option('--validation-folder', type=str, default="val", help="[Train] Folder name for validation data")
 @click.option('--epochs', type=int, default=10, help="[Train] Epochs to train model")
 @click.option('--fine-tune', type=bool, help="[Train] If true, it performs fine tuning")
-@click.option('--fine-tune-epochs', type=int, default=100, help="[Train] Epochs to fine tune the model")
 @click.option('--definition-file', type=str, help="[Scaff] Validation definition file route")
 @click.option('--separator', type=str, default='\t', help="[Scaff] Separator character")
 def main(train: bool, extract: bool, scaff: bool,
          images_route: str, model: str,
          output_route: str, image_size: int,
-         epochs: int, fine_tune: bool, fine_tune_epochs: int,
+         train_folder: str, validation_folder: str, epochs: int, fine_tune: bool,
          definition_file: str, separator: str):
     if train:
-        model = ImageModel(base_route=images_route, epochs=epochs, fine_tune_epochs=fine_tune_epochs,
-                           fine_tune=fine_tune)
+        model = ImageModel(base_route=images_route, epochs=epochs, train_folder=train_folder,
+                           validation_folder=validation_folder, fine_tune=fine_tune)
         metrics = model.train()
         
         print(metrics)
