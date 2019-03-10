@@ -9,7 +9,7 @@ setup(
     author_email='jguzmanfd@gmail.com',
     packages=find_packages(),
     entry_points={'console_scripts': ['image_feature_extractor = image_feature_extractor.cli:main']},
-    setup_requires=[
+    install_requires=[
         'click',
         'numpy',
         'tensorflow',
