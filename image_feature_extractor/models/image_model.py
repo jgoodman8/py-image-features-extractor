@@ -11,7 +11,7 @@ from tensorflow.keras.preprocessing import image
 
 
 class ImageModel:
-    def __init__(self, base_route, train_folder="train", validation_folder="validation", epochs=10,
+    def __init__(self, base_route, train_folder="train", validation_folder="val", epochs=10,
                  fine_tune_epochs=100, fine_tune: bool = False):
         self.__model = None
         self.__base_model = None
@@ -23,7 +23,7 @@ class ImageModel:
         
         self.__epochs = epochs
         self.__fine_tune_epochs = fine_tune_epochs
-        self.batch_size = 256
+        self.__batch_size = 256
         
         self.__model_route = "model.h5"
         self.__early_stop = EarlyStopping(monitor='val_acc', min_delta=0, patience=10, verbose=1, mode='auto')

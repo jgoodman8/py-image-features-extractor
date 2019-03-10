@@ -17,7 +17,7 @@ from image_feature_extractor.utils import change_validation_scaffolding
 @click.option('--fine-tune', type=bool, help="[Train] If true, it performs fine tuning")
 @click.option('--fine-tune-epochs', type=int, default=100, help="[Train] Epochs to fine tune the model")
 @click.option('--definition-file', type=str, help="[Scaff] Validation definition file route")
-@click.option('--separator', type=str, default=',', help="[Scaff] Separator character")
+@click.option('--separator', type=str, default='\t', help="[Scaff] Separator character")
 def main(train: bool, extract: bool, scaff: bool,
          images_route: str, model: str,
          output_route: str, image_size: int,
