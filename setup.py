@@ -12,7 +12,9 @@ setup(
     install_requires=[
         'click',
         'numpy',
+        'scikit-image',
         'tensorflow',
+        'opencv-python',
         'pandas',
     ],
     url='https://github.com/jgoodman8/py-image-feature-selector',
