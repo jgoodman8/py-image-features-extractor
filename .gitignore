@@ -7,3 +7,4 @@ tiny-imagenet-200
 *.pyc
 .eggs/**
 **.h5
+output

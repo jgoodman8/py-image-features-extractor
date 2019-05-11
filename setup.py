@@ -16,6 +16,7 @@ setup(
         'tensorflow',
         'opencv-python',
         'pandas',
+        'pytest',
     ],
     url='https://github.com/jgoodman8/py-image-feature-selector',
 )

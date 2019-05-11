@@ -1,1 +1,2 @@
 from image_feature_extractor.extractors.feature_extractor import FeatureExtractor
+from image_feature_extractor.extractors.lbp_extractor import LBPExtractor

@@ -10,12 +10,10 @@ from image_feature_extractor.extractors.extractor import Extractor
 
 class LBPExtractor(Extractor):
     
-    def __init__(self, route: str, output_file: str, points: int, radius: int, size: int, grid_x: int, grid_y: int,
-                 verbose: int = 1, verbosity_frequency: int = 10, image_extension: str = 'JPEG', header: int = 1,
-                 method: str = 'uniform', color_code: int = cv2.COLOR_BGR2GRAY):
+    def __init__(self, base_route: str, points: int, radius: int, size: int, grid_x: int, grid_y: int,
+                 image_extension: str = 'JPEG', method: str = 'uniform', color_code: int = cv2.COLOR_BGR2GRAY):
         
-        super().__init__(route=route, output_file=output_file, verbose=verbose, verbosity_frequency=verbosity_frequency,
-                         image_extension=image_extension, header=header)
+        super().__init__(base_route=base_route, image_extension=image_extension)
         
         self.points: int = points
         self.radius: int = radius
@@ -76,6 +74,7 @@ class LBPExtractor(Extractor):
     def _find_features_size(self) -> int:
         folder = os.listdir(self.base_route)[0]
         images_folder = self._find_images_folder(folder)
-        features = self.extract(images_folder)
+        image_to_extract = os.path.join(images_folder, os.listdir(images_folder)[0])
         
+        features = self.extract(image_to_extract)
         return len(features)
