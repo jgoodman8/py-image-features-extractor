@@ -1,4 +1,3 @@
-import os
 from typing import List, Tuple
 
 import cv2
@@ -11,9 +10,10 @@ from image_feature_extractor.extractors.extractor import Extractor
 class LBPExtractor(Extractor):
     
     def __init__(self, base_route: str, points: int, radius: int, size: int, grid_x: int, grid_y: int,
-                 image_extension: str = 'JPEG', method: str = 'uniform', color_code: int = cv2.COLOR_BGR2GRAY):
+                 image_extension: str = 'JPEG', bath_size=128, method: str = 'uniform',
+                 color_code: int = cv2.COLOR_BGR2GRAY):
         
-        super().__init__(base_route=base_route, image_extension=image_extension)
+        super().__init__(base_route=base_route, image_extension=image_extension, size=size, bath_size=bath_size)
         
         self.points: int = points
         self.radius: int = radius
@@ -23,8 +23,6 @@ class LBPExtractor(Extractor):
         self.bins: np.ndarray = np.arange(0, self.points + 3)
         self.range: Tuple[int, int] = (0, self.points + 2)
         
-        self.width: int = size
-        self.height: int = size
         self.height_step: int = self.height // grid_y
         self.width_step: int = self.width // grid_x
     
@@ -70,11 +68,3 @@ class LBPExtractor(Extractor):
         hist, _ = np.histogram(lbp_chunk, bins=self.bins, range=self.range)
         
         return hist
-    
-    def _find_features_size(self) -> int:
-        folder = os.listdir(self.base_route)[0]
-        images_folder = self._find_images_folder(folder)
-        image_to_extract = os.path.join(images_folder, os.listdir(images_folder)[0])
-        
-        features = self.extract(image_to_extract)
-        return len(features)

@@ -24,7 +24,7 @@ def clean_test_output_csv_route() -> None:
 
 
 def load_csv_from_route(route: str) -> pd.DataFrame:
-    return pd.DataFrame.from_csv(path=route, index_col=None)
+    return pd.read_csv(route)
 
 
 def count_test_images() -> int:

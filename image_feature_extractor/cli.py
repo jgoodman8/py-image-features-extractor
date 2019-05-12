@@ -1,6 +1,6 @@
 import click
 
-from image_feature_extractor.extractors.feature_extractor import FeatureExtractor
+from image_feature_extractor.extractors.deep_extractor import DeepExtractor
 from image_feature_extractor.models.image_model import ImageModel
 from image_feature_extractor.utils import change_validation_scaffolding
 
@@ -10,8 +10,8 @@ from image_feature_extractor.utils import change_validation_scaffolding
 @click.option('--extract', type=bool, help="If true, it performs feature extraction")
 @click.option('--scaff', type=bool, help="If true, it performs a change in validation scaffolding")
 @click.option('--images-route', type=str, help="Input images base route")
-@click.option('--model', type=str, help="[Train/Extract] Model used to train model or extract features")
-@click.option('--output-route', type=str, help="[Extract] Output route for features csv file")
+@click.option('--model-name', type=str, help="[Train/Extract] Model used to train model or extract features")
+@click.option('--output-file', type=str, help="[Extract] Output route for features csv file")
 @click.option('--image-size', type=int, help="[Extract] Image size for (height, width)")
 @click.option('--train-folder', type=str, default="train", help="[Train] Folder name for train data")
 @click.option('--validation-folder', type=str, default="val", help="[Train] Folder name for validation data")
@@ -20,8 +20,8 @@ from image_feature_extractor.utils import change_validation_scaffolding
 @click.option('--definition-file', type=str, help="[Scaff] Validation definition file route")
 @click.option('--separator', type=str, default='\t', help="[Scaff] Separator character")
 def main(train: bool, extract: bool, scaff: bool,
-         images_route: str, model: str,
-         output_route: str, image_size: int,
+         images_route: str, model_name: str,
+         output_file: str, image_size: int,
          train_folder: str, validation_folder: str, epochs: int, fine_tune: bool,
          definition_file: str, separator: str):
     if train:
@@ -32,11 +32,8 @@ def main(train: bool, extract: bool, scaff: bool,
         print(metrics)
     
     elif extract:
-        extractor = FeatureExtractor(images_route, model, output_route)
-        if int(image_size) > 0:
-            extractor.width = int(image_size)
-            extractor.height = int(image_size)
-        extractor.extract_and_store()
+        extractor = DeepExtractor(base_route=images_route, model_name=model_name, size=image_size)
+        extractor.extract_and_save(output_file=output_file)
     
     elif scaff:
         change_validation_scaffolding(images_route, definition_file, separator)

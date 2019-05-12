@@ -5,22 +5,30 @@ from abc import ABC
 
 import math
 import numpy as np
+from tensorflow.keras.preprocessing import image as image_preprocessor
 
 
 class Extractor(ABC):
     
-    def __init__(self, base_route: str, image_extension: str = 'JPEG'):
+    def __init__(self, base_route: str, size=224, bath_size=128, image_extension: str = 'JPEG'):
         
         self.base_route: str = base_route
         self.output_file: str = ''
         self.num_classes: int = len(os.listdir(base_route))
         self.file_writer = None
         
+        self.bath_size = bath_size
+        self.__width = self.__height = size
+        self.image_shape = (self.width, self.height, 3)
+        self.directory_iterator = None
+        
         self.counter: int = 0
         self.verbose: int = 1
         self.header: int = 1
         self.verbosity_frequency: int = 10
         self.image_extension: str = image_extension
+        
+        self._set_directory_iterator(self.base_route)
         super().__init__()
     
     def extract_and_save(self, output_file: str, verbose: int = 1, verbosity_frequency: int = 10, header: int = 1):
@@ -33,33 +41,37 @@ class Extractor(ABC):
             self.file_writer = csv.writer(f)
             self._print_header()
             
-            for folder_name in os.listdir(self.base_route):
-                folder_route = self._find_images_folder(folder_name)
-                for image_name in os.listdir(folder_route):
-                    features = self._extract_image_features(folder_route, image_name)
-                    self._print_row(features, folder_name)
-                
-                self._update_counter()
+            for filename, category in zip(self.directory_iterator.filenames, self.directory_iterator.classes):
+                image_route = os.path.join(self.base_route, self.directory_iterator.filenames[0])
+                features = self.extract(image_route=image_route)
+                self._print_row(features=features, label=category)
+            
+            self._update_counter()
     
-    def _extract_image_features(self, folder_route: str, image_name: str) -> np.ndarray:
-        image_route = os.path.join(folder_route, image_name)
-        return self.extract(image_route=image_route)
+    def extract(self, image_route: str) -> np.ndarray:
+        pass
     
-    def _print_header(self):
-        if self.header:
-            header = list(range(self._find_features_size()))
-            header.append(-1)
-            self.file_writer.writerow(header)
+    def _set_directory_iterator(self, route: str) -> None:
+        image_generator = image_preprocessor.ImageDataGenerator(rescale=1.0 / 255)
+        
+        self.directory_iterator = image_generator.flow_from_directory(
+            directory=route,
+            target_size=(self.width, self.height),
+            batch_size=self.bath_size,
+            class_mode="categorical"
+        )
     
     def _print_row(self, features: np.ndarray, label) -> None:
         self.file_writer.writerow(np.append(features, [label]))
     
-    def _find_images_folder(self, folder: str) -> str:
-        folder_content = os.listdir(os.path.join(self.base_route, folder))
-        if folder_content is not None and len(folder_content) and self.image_extension in folder_content[0]:
-            return os.path.join(self.base_route, folder)
-        
-        return os.path.join(self.base_route, folder, 'images')
+    def _print_header(self):
+        if self.header:
+            column_names = list(range(self._find_features_size())) + [-1]
+            self.file_writer.writerow(column_names)
+    
+    def _find_features_size(self) -> int:
+        example_image_route = os.path.join(self.base_route, self.directory_iterator.filenames[0])
+        return len(self.extract(image_route=example_image_route))
     
     def _update_counter(self) -> None:
         self.counter += 1
@@ -68,8 +80,20 @@ class Extractor(ABC):
             progress_percent: int = math.floor((self.counter / self.num_classes) * 100)
             sys.stdout.write("{}%".format(progress_percent))
     
-    def _find_features_size(self) -> int:
-        pass
+    @property
+    def width(self):
+        return self.__width
     
-    def extract(self, image_route: str) -> np.ndarray:
-        pass
+    @width.setter
+    def width(self, width):
+        self.__width = width
+        self.image_shape = (width, self.height, 3)
+    
+    @property
+    def height(self):
+        return self.__height
+    
+    @height.setter
+    def height(self, height):
+        self.__height = height
+        self.image_shape = (self.width, height, 3)
