@@ -14,7 +14,7 @@ class TestDeepExtractor(object):
     
     @pytest.mark.parametrize('model', ['vgg19', 'inception_v3', 'inception_resnet_v2'])
     def test_features_are_extracted_from_a_given_image_route(self, model: str):
-        extractor = DeepExtractor(base_route=test_utils.get_test_images_route(), model_name=model, size=75)
+        extractor = DeepExtractor(base_route=test_utils.get_test_base_route(), model_name=model, size=75)
         
         features = extractor.extract(image_route=test_utils.get_test_image_route())
         
@@ -26,7 +26,7 @@ class TestDeepExtractor(object):
     def test_features_are_extracted_from_a_given_image_route(self, model: str):
         output_csv = test_utils.get_test_output_csv_route()
         
-        extractor = DeepExtractor(base_route=test_utils.get_test_images_route(), model_name=model, size=75)
+        extractor = DeepExtractor(base_route=test_utils.get_test_base_route(), model_name=model, size=75)
         extractor.extract_and_save(output_csv)
         
         features = test_utils.load_csv_from_route(output_csv)

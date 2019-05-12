@@ -10,14 +10,14 @@ from tensorflow.keras.preprocessing import image as image_preprocessor
 
 class Extractor(ABC):
     
-    def __init__(self, base_route: str, size=224, bath_size=128, image_extension: str = 'JPEG'):
+    def __init__(self, base_route: str, size=224, batch_size=128):
         
         self.base_route: str = base_route
         self.output_file: str = ''
         self.num_classes: int = len(os.listdir(base_route))
         self.file_writer = None
         
-        self.bath_size = bath_size
+        self.bath_size = batch_size
         self.__width = self.__height = size
         self.image_shape = (self.width, self.height, 3)
         self.directory_iterator = None
@@ -26,7 +26,6 @@ class Extractor(ABC):
         self.verbose: int = 1
         self.header: int = 1
         self.verbosity_frequency: int = 10
-        self.image_extension: str = image_extension
         
         self._set_directory_iterator(self.base_route)
         super().__init__()
@@ -42,7 +41,7 @@ class Extractor(ABC):
             self._print_header()
             
             for filename, category in zip(self.directory_iterator.filenames, self.directory_iterator.classes):
-                image_route = os.path.join(self.base_route, self.directory_iterator.filenames[0])
+                image_route = os.path.join(self.base_route, filename)
                 features = self.extract(image_route=image_route)
                 self._print_row(features=features, label=category)
             
@@ -70,8 +69,7 @@ class Extractor(ABC):
             self.file_writer.writerow(column_names)
     
     def _find_features_size(self) -> int:
-        example_image_route = os.path.join(self.base_route, self.directory_iterator.filenames[0])
-        return len(self.extract(image_route=example_image_route))
+        pass
     
     def _update_counter(self) -> None:
         self.counter += 1
@@ -79,6 +77,9 @@ class Extractor(ABC):
         if self.verbose and (self.counter % self.verbosity_frequency == 0):
             progress_percent: int = math.floor((self.counter / self.num_classes) * 100)
             sys.stdout.write("{}%".format(progress_percent))
+    
+    def _reset_counter(self) -> None:
+        self.counter = 0
     
     @property
     def width(self):

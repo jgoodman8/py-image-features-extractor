@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
 from tensorflow.keras.applications.inception_resnet_v2 import preprocess_input as resnet_preprocessor
@@ -12,9 +14,9 @@ from image_feature_extractor.extractors.extractor import Extractor
 
 class DeepExtractor(Extractor):
     
-    def __init__(self, base_route, model_name: str, size=139, bath_size=128, image_extension: str = 'JPEG'):
+    def __init__(self, base_route, model_name: str, size=224, batch_size=128):
         
-        super().__init__(base_route=base_route, image_extension=image_extension, size=size, bath_size=bath_size)
+        super().__init__(base_route=base_route, size=size, batch_size=batch_size)
         
         self.model = None
         self.file_writer = None
@@ -42,3 +44,7 @@ class DeepExtractor(Extractor):
         preprocessed_img = self.model_preprocess(image)
         
         return self.model.predict(preprocessed_img).flatten()
+    
+    def _find_features_size(self) -> int:
+        example_image_route = os.path.join(self.base_route, self.directory_iterator.filenames[0])
+        return len(self.extract(image_route=example_image_route))

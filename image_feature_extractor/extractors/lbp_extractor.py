@@ -1,3 +1,4 @@
+import os
 from typing import List, Tuple
 
 import cv2
@@ -10,10 +11,9 @@ from image_feature_extractor.extractors.extractor import Extractor
 class LBPExtractor(Extractor):
     
     def __init__(self, base_route: str, points: int, radius: int, size: int, grid_x: int, grid_y: int,
-                 image_extension: str = 'JPEG', bath_size=128, method: str = 'uniform',
-                 color_code: int = cv2.COLOR_BGR2GRAY):
+                 batch_size=128, method: str = 'uniform', color_code: int = cv2.COLOR_BGR2GRAY):
         
-        super().__init__(base_route=base_route, image_extension=image_extension, size=size, bath_size=bath_size)
+        super().__init__(base_route=base_route, size=size, batch_size=batch_size)
         
         self.points: int = points
         self.radius: int = radius
@@ -68,3 +68,7 @@ class LBPExtractor(Extractor):
         hist, _ = np.histogram(lbp_chunk, bins=self.bins, range=self.range)
         
         return hist
+    
+    def _find_features_size(self) -> int:
+        example_image_route = os.path.join(self.base_route, self.directory_iterator.filenames[0])
+        return len(self.extract(image_route=example_image_route))
