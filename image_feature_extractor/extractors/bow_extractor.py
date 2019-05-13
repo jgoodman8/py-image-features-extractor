@@ -5,24 +5,28 @@ import cv2
 import numpy as np
 
 from image_feature_extractor.extractors import Extractor
+from image_feature_extractor.models.clutering_model import ClusteringModel
 
 
 class BoWExtractor(Extractor):
     
-    def __init__(self, base_route: str, k: int, method: str, size: int = 224, batch_size: int = 128,
+    def __init__(self, base_route: str, method: str, k: int = 0, min_k: int = 0, max_k: int = 0, step: int = 0,
+                 threshold: float = 0.85, cluster_mode: str = 'manual', size: int = 224, batch_size: int = 128,
                  color_code: int = cv2.COLOR_BGR2RGB):
         
         super().__init__(base_route=base_route, size=size, batch_size=batch_size)
+        
         self.k: int = k
         self.image_keypoints: Dict = {}
-        self.bow_kmeans = cv2.BOWKMeansTrainer(self.k)
         
         self.detector = None
+        self.bow_kmeans = None
         self.__bow_extractor = None
         self.__empty_histogram: List[float] = [0.0] * self.k
         self.__color_code: int = color_code
         
         self._set_detector(method)
+        self._set_clustering_trainer(mode=cluster_mode, min_k=min_k, max_k=max_k, step=step, threshold=threshold)
     
     def setup(self):
         for filename, category in zip(self.directory_iterator.filenames, self.directory_iterator.classes):
@@ -52,6 +56,13 @@ class BoWExtractor(Extractor):
             self.detector = cv2.ORB_create()
         elif method.lower() == 'akaze':
             self.detector = cv2.AKAZE_create()
+    
+    def _set_clustering_trainer(self, mode: str, min_k: int = 0, max_k: int = 0, step: int = 0,
+                                threshold: float = 0.85):
+        if mode == 'manual':
+            self.bow_kmeans = cv2.BOWKMeansTrainer(self.k)
+        elif mode == 'auto':
+            self.bow_kmeans = ClusteringModel(min_k, max_k, step, threshold)
     
     def _extract_and_add_image(self, image_route: str):
         keypoints, descriptors = self._process_image(image_route)

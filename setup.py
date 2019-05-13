@@ -17,6 +17,9 @@ setup(
         'opencv-python',
         'pandas',
         'pytest',
+        'matplotlib',
+        'scikit-learn',
+        'scipy',
     ],
     url='https://github.com/jgoodman8/py-image-feature-selector',
 )

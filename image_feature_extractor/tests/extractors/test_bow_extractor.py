@@ -39,9 +39,26 @@ class TestBowExtractor(object):
         assert (len(descriptors) <= len(extractor.image_keypoints.keys()))
     
     @pytest.mark.parametrize('method', ['kaze'])
-    def test_features_are_extracted_from_a_given_image_route(self, method: str):
+    def test_features_are_extracted_from_a_given_image_route_in_manual_mode(self, method: str):
         output_file = test_utils.get_test_output_csv_route()
-        extractor = BoWExtractor(base_route=test_utils.get_test_base_route(), k=3, method=method, size=64)
+        extractor = BoWExtractor(base_route=test_utils.get_test_base_route(), k=3, method=method, size=64,
+                                 cluster_mode='manual')
+        extractor.setup()
+        extractor.fit()
+        
+        extractor.extract_and_save(output_file)
+        
+        features = test_utils.load_csv_from_route(output_file)
+        
+        expected_width = extractor.k + 1
+        expected_height = test_utils.count_test_images()
+        assert (features.shape == (expected_height, expected_width))
+    
+    @pytest.mark.parametrize('method', ['kaze'])
+    def test_features_are_extracted_from_a_given_image_route_in_automatic_mode(self, method: str):
+        output_file = test_utils.get_test_output_csv_route()
+        extractor = BoWExtractor(base_route=test_utils.get_test_base_route(), method=method, size=64,
+                                 cluster_mode='auto', min_k=2, max_k=100, step=1, threshold=0.95)
         extractor.setup()
         extractor.fit()
         
