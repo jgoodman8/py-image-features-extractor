@@ -5,7 +5,7 @@ from abc import ABC
 
 import math
 import numpy as np
-from tensorflow.keras.preprocessing import image as image_preprocessor
+from tensorflow.python.keras.preprocessing import image as image_preprocessor
 
 
 class Extractor(ABC):

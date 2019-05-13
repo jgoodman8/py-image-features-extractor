@@ -1,13 +1,13 @@
 import math
 import os
 
-from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import GlobalAveragePooling2D
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import SGD
-from tensorflow.keras.preprocessing import image
+from tensorflow.python.keras.applications.vgg19 import VGG19
+from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.python.keras.layers import Dense
+from tensorflow.python.keras.layers import GlobalAveragePooling2D
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.optimizers import SGD
+from tensorflow.python.keras.preprocessing import image
 
 
 class ImageModel:

@@ -1,13 +1,13 @@
 import os
 
 import numpy as np
-from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
-from tensorflow.keras.applications.inception_resnet_v2 import preprocess_input as resnet_preprocessor
-from tensorflow.keras.applications.inception_v3 import InceptionV3
-from tensorflow.keras.applications.inception_v3 import preprocess_input as inception_preprocessor
-from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.applications.vgg19 import preprocess_input as vgg19_preprocessor
-from tensorflow.keras.preprocessing import image as image_preprocessor
+from tensorflow.python.keras.applications.inception_resnet_v2 import InceptionResNetV2
+from tensorflow.python.keras.applications.inception_resnet_v2 import preprocess_input as resnet_preprocessor
+from tensorflow.python.keras.applications.inception_v3 import InceptionV3
+from tensorflow.python.keras.applications.inception_v3 import preprocess_input as inception_preprocessor
+from tensorflow.python.keras.applications.vgg19 import VGG19
+from tensorflow.python.keras.applications.vgg19 import preprocess_input as vgg19_preprocessor
+from tensorflow.python.keras.preprocessing import image as image_preprocessor
 
 from image_feature_extractor.extractors.extractor import Extractor
 
