@@ -10,7 +10,7 @@ from tensorflow.python.keras.optimizers import SGD
 from tensorflow.python.keras.preprocessing import image
 
 
-class ImageModel:
+class ImageModel(object):
     def __init__(self, base_route, train_folder="train", validation_folder="val", epochs=10, fine_tune: bool = False):
         self.__model = None
         self.__base_model = None

@@ -4,8 +4,8 @@ from typing import List, Dict
 import cv2
 import numpy as np
 
-from image_feature_extractor.extractors import Extractor
-from image_feature_extractor.models.clutering_model import ClusteringModel
+from image_feature_extractor.extractors.extractor import Extractor
+from image_feature_extractor.models import ClusteringModel
 
 
 class BoWExtractor(Extractor):

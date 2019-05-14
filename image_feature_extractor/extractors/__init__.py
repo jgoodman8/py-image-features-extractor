@@ -1,3 +1,4 @@
+from image_feature_extractor.extractors.bow_extractor import BoWExtractor
 from image_feature_extractor.extractors.deep_extractor import DeepExtractor
-from image_feature_extractor.extractors.lbp_extractor import Extractor
+from image_feature_extractor.extractors.extractor import Extractor
 from image_feature_extractor.extractors.lbp_extractor import LBPExtractor

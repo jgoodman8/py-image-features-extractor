@@ -3,7 +3,7 @@ from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
 
 
-class ClusteringModel:
+class ClusteringModel(object):
     def __init__(self, min_k: int = 1, max_k: int = 1, step: int = 1, threshold: float = 0.85):
         self.data = None
         self.selected_model = None

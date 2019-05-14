@@ -1,10 +1,8 @@
 from setuptools import find_packages, setup
 
-import image_feature_extractor
-
 setup(
     name='py-image-feature-extractor',
-    version=image_feature_extractor.__version__,
+    version='0.0.5',
     author='Javier Guzman',
     author_email='jguzmanfd@gmail.com',
     packages=find_packages(),
