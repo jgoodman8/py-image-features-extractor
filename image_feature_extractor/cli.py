@@ -53,6 +53,7 @@ def extract(mode: str, src: str, deep_model: str, size: int, output: str, points
     elif mode == 'bow':
         if has_required_parameters(src=src, bow_method=bow_method, k=k, output=output):
             extractor = BoWExtractor(base_route=src, method=bow_method, k=k)
+            extractor.setup()
             extractor.fit()
             extractor.extract_and_save(output_file=output)
     else:
