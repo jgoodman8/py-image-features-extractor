@@ -44,8 +44,11 @@ def train(images_folder: str, train_folder: str, validation_folder: str, epochs:
 @click.option('--detector', type=click.Choice(['kaze', 'sift', 'surf']),
               help="Feature detection method used to perform the BoW extraction")
 @click.option('--k', type=int, help="Number of centroids to use on the clustering step")
+@click.option('--export', is_flag=True, help="If used, the kMeans centroids will be saved at the '--vocabulary-route'")
+@click.option('--load', is_flag=True, help="If used, the kMeans centroids will be loaded from the '--vocabulary-route'")
+@click.option('--vocabulary-route', type=str, help="Route where to load/save the kMeans vocabulary")
 def extract(deep: bool, lbp: bool, bow: bool, src: str, dst: str, cnn: str, size: int, points: int, radius: int,
-            grid: int, detector: str, k: int):
+            grid: int, detector: str, k: int, export: bool, load: bool, vocabulary_route: str):
     if deep:
         if has_required_parameters(src=src, deep_model=cnn, size=size, output=dst):
             extractor = DeepExtractor(base_route=src, model_name=cnn, size=size)
@@ -58,8 +61,14 @@ def extract(deep: bool, lbp: bool, bow: bool, src: str, dst: str, cnn: str, size
         if has_required_parameters(src=src, bow_method=detector, k=k, output=dst):
             extractor = BoWExtractor(base_route=src, method=detector, k=k)
             extractor.setup()
-            extractor.fit()
+            if load:
+                extractor.load(vocabulary_route)
+            else:
+                extractor.fit()
+            if export:
+                extractor.export(vocabulary_route)
             extractor.extract_and_save(output_file=dst)
+    
     else:
         click.echo('Extraction mode is required (--mode option)')
 

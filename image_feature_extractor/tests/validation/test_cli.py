@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from click.testing import CliRunner, Result
 
@@ -12,6 +13,7 @@ class TestCli(object):
         # No actions before every test
         yield
         test_utils.clean_test_output_csv_route()
+        test_utils.clean_test_output_ndarray_route()
     
     @pytest.mark.parametrize('cnn', ['vgg19', 'inception_v3', 'inception_resnet_v2'])
     def test_feature_extraction_with_deep_models(self, cnn: str):
@@ -39,5 +41,27 @@ class TestCli(object):
         runner = CliRunner()
         result: Result = runner.invoke(cli, ['extract', '--bow', '--size', 64, '--detector', detector,
                                              '--src', test_utils.get_test_base_route(), '--dst', dst, '--k', 2])
+        
+        test_utils.assert_validation_test(result)
+    
+    @pytest.mark.parametrize('detector', ['kaze', 'sift', 'surf'])
+    def test_feature_extraction_with_bow_with_export_and_load(self, detector: str):
+        k = 3
+        dst = test_utils.get_test_output_csv_route()
+        vocabulary_file = test_utils.get_test_output_ndarray_route()
+        
+        runner = CliRunner()
+        result: Result = runner.invoke(cli, ['extract', '--bow', '--size', 64, '--detector', detector,
+                                             '--src', test_utils.get_test_base_route(), '--dst', dst, '--k', k,
+                                             '--export', '--vocabulary-route', vocabulary_file])
+        
+        test_utils.assert_validation_test(result)
+        vocabulary = np.load(vocabulary_file)
+        assert (vocabulary.shape[0] == k)
+        
+        test_utils.clean_test_output_csv_route()
+        result: Result = runner.invoke(cli, ['extract', '--bow', '--size', 64, '--detector', detector,
+                                             '--src', test_utils.get_test_base_route(), '--dst', dst, '--k', k,
+                                             '--load', '--vocabulary-route', vocabulary_file])
         
         test_utils.assert_validation_test(result)
