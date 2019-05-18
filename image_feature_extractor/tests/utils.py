@@ -2,6 +2,7 @@ import os
 import random
 
 import pandas as pd
+from click.testing import Result
 
 
 def get_test_base_route() -> str:
@@ -37,3 +38,15 @@ def count_test_images() -> int:
         num_images += len(os.listdir(os.path.join(base_route, folder, 'images')))
     
     return num_images
+
+
+def assert_validation_test(result: Result, output_file: str = get_test_output_csv_route()):
+    assert (result.exit_code == 0)
+    
+    output = load_csv_from_route(output_file)
+    assert (output.size > 0)
+
+
+def get_expected_descriptor_size(descriptor: str) -> int:
+    descriptors_sizes = {'akaze': 61, 'kaze': 64, 'orb': 32, 'brisk': 64, 'sift': 128, 'surf': 64}
+    return descriptors_sizes[descriptor]

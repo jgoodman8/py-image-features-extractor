@@ -6,16 +6,16 @@ from image_feature_extractor.tests import utils as test_utils
 
 class TestBowExtractor(object):
     
-    @pytest.mark.parametrize('method', ['kaze'])
+    @pytest.mark.parametrize('method', ['kaze', 'sift', 'surf'])
     def test_keypoints_and_descriptors_detection(self, method: str):
         extractor = BoWExtractor(base_route=test_utils.get_test_base_route(), k=3, method=method, size=64)
         descriptors, keypoints = extractor._process_image(image_route=test_utils.get_test_image_route())
         
         assert (len(descriptors) > 0)
         assert (keypoints.shape[0] == len(descriptors))
-        assert (keypoints.shape[1] == 64)
+        assert (keypoints.shape[1] == extractor.detector.descriptorSize())
     
-    @pytest.mark.parametrize('method', ['kaze'])
+    @pytest.mark.parametrize('method', ['kaze', 'sift', 'surf'])
     def test_feature_detection_and_addition(self, method: str):
         image_route = test_utils.get_test_image_route()
         
@@ -28,7 +28,7 @@ class TestBowExtractor(object):
         assert (len(descriptors[0]) == len(expected_descriptors))
         assert (len(descriptors[0]) == len(expected_keypoints))
     
-    @pytest.mark.parametrize('method', ['kaze'])
+    @pytest.mark.parametrize('method', ['kaze', 'sift', 'surf'])
     def test_extraction_setup(self, method: str):
         extractor = BoWExtractor(base_route=test_utils.get_test_base_route(), k=3, method=method, size=64)
         extractor.setup()
@@ -38,7 +38,7 @@ class TestBowExtractor(object):
         assert (len(descriptors) > 0)
         assert (len(descriptors) <= len(extractor.image_keypoints.keys()))
     
-    @pytest.mark.parametrize('method', ['kaze'])
+    @pytest.mark.parametrize('method', ['kaze', 'sift', 'surf'])
     def test_features_are_extracted_from_a_given_image_route_in_manual_mode(self, method: str):
         output_file = test_utils.get_test_output_csv_route()
         extractor = BoWExtractor(base_route=test_utils.get_test_base_route(), k=3, method=method, size=64,
@@ -54,7 +54,8 @@ class TestBowExtractor(object):
         expected_height = test_utils.count_test_images()
         assert (features.shape == (expected_height, expected_width))
     
-    @pytest.mark.parametrize('method', ['kaze'])
+    @pytest.mark.skip(reason="Very slow test to run always")
+    @pytest.mark.parametrize('method', ['kaze', 'sift', 'surf'])
     def test_features_are_extracted_from_a_given_image_route_in_automatic_mode(self, method: str):
         output_file = test_utils.get_test_output_csv_route()
         extractor = BoWExtractor(base_route=test_utils.get_test_base_route(), method=method, size=64,

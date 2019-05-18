@@ -49,13 +49,14 @@ class BoWExtractor(Extractor):
         return self.__bow_extractor.compute(image, keypoints)[0]
     
     def _set_detector(self, method: str):
-        # TODO: Add more detection methods
-        if method.lower() == 'kaze':
+        if method.lower() == "kaze":
             self.detector = cv2.KAZE_create()
-        elif method.lower() == 'orb':
-            self.detector = cv2.ORB_create()
-        elif method.lower() == 'akaze':
-            self.detector = cv2.AKAZE_create()
+        elif method.lower() == "sift":
+            self.detector = cv2.xfeatures2d.SIFT_create()
+        elif method.lower() == "surf":
+            self.detector = cv2.xfeatures2d.SURF_create()
+        else:
+            raise Exception("Non implemented method")
     
     def _set_clustering_trainer(self, mode: str, min_k: int = 0, max_k: int = 0, step: int = 0,
                                 threshold: float = 0.85):
