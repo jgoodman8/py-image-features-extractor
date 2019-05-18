@@ -21,7 +21,7 @@ class BoWExtractor(Extractor):
         
         self.detector = None
         self.bow_kmeans = None
-        self.__bow_extractor = None
+        self.bow_extractor = None
         self.__empty_histogram: List[float] = [0.0] * self.k
         self.__color_code: int = color_code
         
@@ -37,8 +37,23 @@ class BoWExtractor(Extractor):
     
     def fit(self):
         vocabulary = self.bow_kmeans.cluster()
-        self.__bow_extractor = cv2.BOWImgDescriptorExtractor(self.detector, cv2.BFMatcher(cv2.NORM_L2))
-        self.__bow_extractor.setVocabulary(vocabulary)
+        self.bow_extractor = cv2.BOWImgDescriptorExtractor(self.detector, cv2.BFMatcher(cv2.NORM_L2))
+        self.bow_extractor.setVocabulary(vocabulary)
+    
+    def export(self, export_route: str):
+        vocabulary: np.ndarray = self.bow_extractor.getVocabulary()
+        
+        if '.npy' in export_route:
+            np.save(export_route, vocabulary)
+        elif '.npz' in export_route:
+            np.savez(export_route, vocabulary)
+        else:
+            raise NotImplementedError()
+    
+    def load(self, import_route: str):
+        vocabulary: np.ndarray = np.load(import_route)
+        self.bow_extractor = cv2.BOWImgDescriptorExtractor(self.detector, cv2.BFMatcher(cv2.NORM_L2))
+        self.bow_extractor.setVocabulary(vocabulary)
     
     def extract(self, image_route: str):
         image = self._read_image(image_route)
@@ -46,7 +61,7 @@ class BoWExtractor(Extractor):
         if keypoints is None or len(keypoints) == 0:
             return self.__empty_histogram
         
-        return self.__bow_extractor.compute(image, keypoints)[0]
+        return self.bow_extractor.compute(image, keypoints)[0]
     
     def _set_detector(self, method: str):
         if method.lower() == "kaze":

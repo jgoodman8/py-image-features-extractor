@@ -9,6 +9,14 @@ def get_test_base_route() -> str:
     return 'micro-imagenet/train'
 
 
+def get_test_output_csv_route() -> str:
+    return 'output/features.csv'
+
+
+def get_test_output_ndarray_route() -> str:
+    return 'output/vocabulary.npy'
+
+
 def get_test_image_route() -> str:
     base_route = get_test_base_route()
     image_idx = random.randint(0, 499)
@@ -16,12 +24,14 @@ def get_test_image_route() -> str:
     return os.path.join(images_folder, os.listdir(images_folder)[image_idx])
 
 
-def get_test_output_csv_route() -> str:
-    return 'output/features.csv'
-
-
 def clean_test_output_csv_route() -> None:
     route = get_test_output_csv_route()
+    if os.path.exists(route):
+        os.remove(route)
+
+
+def clean_test_output_ndarray_route() -> None:
+    route = get_test_output_ndarray_route()
     if os.path.exists(route):
         os.remove(route)
 
