@@ -2,12 +2,16 @@ import os, shutil
 import pandas as pd
 
 
-def change_validation_scaffolding(base_route: str, definition_file: str, separator: str, has_header: int):
+def change_validation_scaffolding(base_route: str, definition_file: str, separator: str, has_header: int,
+                                  extension: str):
     validation_data = _load_validation_data(definition_file, separator, has_header)
     
     for row in validation_data.iterrows():
         file = row[1]['file']
         label = row[1]['label']
+        
+        if '.' not in file:  # Add extension if it is not specified in descriptor file
+            file = file + '.' + extension
         
         label_folder = os.path.join(base_route, label)
         
