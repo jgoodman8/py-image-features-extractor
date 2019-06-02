@@ -75,10 +75,15 @@ def extract(deep: bool, lbp: bool, bow: bool, src: str, dst: str, cnn: str, size
 
 @main.command()
 @click.option('--images-route', type=str, help="Input images base route")
-@click.option('--definition-file', type=str, help="[Scaff] Validation definition file route")
-@click.option('--separator', type=str, default='\t', help="[Scaff] Separator character")
-def scaff(images_route: str, definition_file: str, separator: str):
-    change_validation_scaffolding(images_route, definition_file, separator)
+@click.option('--definition-file', type=str, help="Validation definition file route")
+@click.option('--separator', type=str, default='\t', help="Separator character")
+@click.option('--header', is_flag=True, help="Definition file has header")
+def scaff(images_route: str, definition_file: str, separator: str, header: bool):
+    if has_required_parameters(images_route=images_route, definition_file=definition_file):
+        has_header = 1 if header else None
+        change_validation_scaffolding(images_route, definition_file, separator, has_header)
+    else:
+        click.echo('Options: --images-route and --definition-file are required')
 
 
 def has_required_parameters(**kwargs):
