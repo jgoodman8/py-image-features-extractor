@@ -20,8 +20,8 @@ class LBPExtractor(Extractor):
         self.method: str = method
         self.color_code: int = color_code
         
-        self.bins: np.ndarray = np.arange(0, self.points + 3)
-        self.range: Tuple[int, int] = (0, self.points + 2)
+        self.bins: int = 256
+        self.range: Tuple[int, int] = (0, 255)
         
         self.height_step: int = self.height // grid_y
         self.width_step: int = self.width // grid_x

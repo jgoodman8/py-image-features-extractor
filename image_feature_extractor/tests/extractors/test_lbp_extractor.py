@@ -36,7 +36,7 @@ class TestLBPExtractor(object):
         assert (len(histogram) == x * y)
         
         for histogram_row in histogram:
-            assert (histogram_row.shape[0] == len(extractor.bins) - 1)
+            assert (histogram_row.shape[0] == extractor.bins)
     
     @pytest.mark.parametrize('x', [2, 4])
     @pytest.mark.parametrize('y', [2, 4])
@@ -44,7 +44,7 @@ class TestLBPExtractor(object):
         extractor = LBPExtractor(test_utils.get_test_base_route(), size=64, points=3, radius=1, grid_x=x, grid_y=y)
         features = extractor.extract(test_utils.get_test_image_route())
         
-        expected_size = x * y * (len(extractor.bins) - 1)
+        expected_size = x * y * extractor.bins
         assert (features.shape[0] == expected_size)
     
     @pytest.mark.parametrize('x', [2, 4])
@@ -58,6 +58,6 @@ class TestLBPExtractor(object):
         
         features = test_utils.load_csv_from_route(output_csv)
         
-        expected_width = x * y * (len(extractor.bins) - 1) + 1  # Number of features + label column
+        expected_width = x * y * extractor.bins + 1  # Number of features + label column
         expected_height = test_utils.count_test_images()
         assert (features.shape == (expected_height, expected_width))
