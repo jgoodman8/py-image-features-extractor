@@ -30,10 +30,8 @@ class BoWExtractor(Extractor):
     
     def setup(self):
         for filename, category in zip(self.directory_iterator.filenames, self.directory_iterator.classes):
-            image_route = os.path.join(self.base_route, filename)
-            self._extract_and_add_image(image_route)
-        
-        self._update_counter()
+            self._extract_and_add_image(os.path.join(self.base_route, filename))
+            self._update_counter()
     
     def fit(self):
         vocabulary = self.bow_kmeans.cluster()

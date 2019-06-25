@@ -23,19 +23,20 @@ class Extractor(ABC):
         self.directory_iterator = None
         
         self.counter: int = 0
-        self.verbose: int = 1
+        self.verbose: bool = True
         self.header: int = 1
         self.verbosity_frequency: int = 10
         
         self._set_directory_iterator(self.base_route)
         super().__init__()
     
-    def extract_and_save(self, output_file: str, verbose: int = 1, verbosity_frequency: int = 10, header: int = 1):
+    def extract_and_save(self, output_file: str, verbose: bool = True, verbosity_frequency: int = 10, header: int = 1):
         self.output_file = output_file
         self.header: int = header
-        self.verbose: int = verbose
+        self.verbose: bool = verbose
         self.verbosity_frequency: int = verbosity_frequency
         
+        self._reset_counter()
         with open(self.output_file, 'w') as f:
             self.file_writer = csv.writer(f)
             self._print_header()
@@ -44,8 +45,7 @@ class Extractor(ABC):
                 image_route = os.path.join(self.base_route, filename)
                 features = self.extract(image_route=image_route)
                 self._print_row(features=features, label=category)
-            
-            self._update_counter()
+                self._update_counter()
     
     def extract(self, image_route: str) -> np.ndarray:
         pass
@@ -74,7 +74,7 @@ class Extractor(ABC):
     def _update_counter(self) -> None:
         self.counter += 1
         
-        if self.verbose and (self.counter % self.verbosity_frequency == 0):
+        if self.verbose and ((self.counter % self.verbosity_frequency) == 0):
             progress_percent: int = math.floor((self.counter / self.num_classes) * 100)
             sys.stdout.write("{}%".format(progress_percent))
     

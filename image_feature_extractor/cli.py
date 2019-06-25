@@ -47,8 +47,9 @@ def train(images_folder: str, train_folder: str, validation_folder: str, epochs:
 @click.option('--export', is_flag=True, help="If used, the kMeans centroids will be saved at the '--vocabulary-route'")
 @click.option('--load', is_flag=True, help="If used, the kMeans centroids will be loaded from the '--vocabulary-route'")
 @click.option('--vocabulary-route', type=str, help="Route where to load/save the kMeans vocabulary")
+@click.option('--verbose', is_flag=True, help="Use verbose mode")
 def extract(deep: bool, lbp: bool, bow: bool, src: str, dst: str, cnn: str, size: int, points: int, radius: int,
-            grid: int, detector: str, k: int, export: bool, load: bool, vocabulary_route: str):
+            grid: int, detector: str, k: int, export: bool, load: bool, vocabulary_route: str, verbose: bool):
     if deep:
         if has_required_parameters(src=src, deep_model=cnn, size=size, output=dst):
             extractor = DeepExtractor(base_route=src, model_name=cnn, size=size)
