@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='py-image-feature-extractor',
-    version='0.0.13',
+    version='0.1.0',
     author='Javier Guzman',
     author_email='jguzmanfd@gmail.com',
     packages=find_packages(),
