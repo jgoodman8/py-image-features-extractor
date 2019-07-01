@@ -42,6 +42,8 @@ This project may be installed as a python package using:
 pip install .
 ```
 
+Or using the [PyPI package](https://pypi.org/project/py-image-feature-extractor/).
+
 ## <a name="tests">Tests</a>
 
 All the test suite has been developed using the [pytest framework](https://docs.pytest.org/en/latest/).

@@ -3,13 +3,18 @@ from setuptools import find_packages, setup
 long_description = '''
 This package provides implementations of different methods to perform image feature extraction. These methods are
 though a Python package and a command line interface. Available feature extraction methods are:
+
 - Convolutional Neural Networks
+  
   - VGG-19
   - ResNet-50
   - DenseNet-50
   - Custom CNN through .h5 file
+
 - Linear Binary Patterns Histograms (LBPH)
+
 - Bag of Features (bag-of-visual-words)
+
   - SIFT
   - SURF
   - KAZE
