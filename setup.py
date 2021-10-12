@@ -35,7 +35,7 @@ setup(
         'scikit-image',
         'tensorflow',
         'opencv-python==3.4.2.17',
-        'opencv-contrib-python==3.4.2.17',
+        'opencv-contrib-python==3.4.7.28',
         'pandas',
         'pytest',
         'matplotlib',
