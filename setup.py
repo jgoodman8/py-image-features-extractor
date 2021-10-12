@@ -34,7 +34,7 @@ setup(
         'numpy',
         'scikit-image',
         'tensorflow',
-        'opencv-python==3.4.2.17',
+        'opencv-python==4.2.0.32',
         'opencv-contrib-python==3.4.2.17',
         'pandas',
         'pytest',
